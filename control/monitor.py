@@ -10,6 +10,7 @@ from django.conf import settings
 
 client = mqtt.Client(settings.MQTT_USER_PUB)
 
+xTemp = 30
 
 def analyze_data():
     # Consulta todos los datos de la última hora, los agrupa por estación y variable
@@ -50,6 +51,13 @@ def analyze_data():
 
         if alert:
             message = "ALERT {} {} {}".format(variable, min_value, max_value)
+            topic = '{}/{}/{}/{}/in'.format(country, state, city, user)
+            print(datetime.now(), "Sending alert to {} {}".format(topic, variable))
+            client.publish(topic, message)
+            alerts += 1
+
+     if item["check_value"] > xTemp:
+            message = "HIGH_TEMP {} {}".format(variable, item["check_value"])
             topic = '{}/{}/{}/{}/in'.format(country, state, city, user)
             print(datetime.now(), "Sending alert to {} {}".format(topic, variable))
             client.publish(topic, message)
