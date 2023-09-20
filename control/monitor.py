@@ -10,15 +10,15 @@ from django.conf import settings
 
 client = mqtt.Client(settings.MQTT_USER_PUB)
 
-xTemp = 30
-
 def analyze_data():
     # Consulta todos los datos de la última hora, los agrupa por estación y variable
     # Compara el promedio con los valores límite que están en la base de datos para esa variable.
     # Si el promedio se excede de los límites, se envia un mensaje de alerta.
 
     print("Calculando alertas...")
-
+    
+    xTemp = 30
+    
     data = Data.objects.filter(
         base_time__gte=datetime.now() - timedelta(hours=1))
     aggregation = data.annotate(check_value=Avg('avg_value')) \
@@ -56,7 +56,7 @@ def analyze_data():
             client.publish(topic, message)
             alerts += 1
 
-     if item["check_value"] > xTemp:
+        if item["check_value"] > xTemp:
             message = "HIGH_TEMP {} {}".format(variable, item["check_value"])
             topic = '{}/{}/{}/{}/in'.format(country, state, city, user)
             print(datetime.now(), "Sending alert to {} {}".format(topic, variable))
